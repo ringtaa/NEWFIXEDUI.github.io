@@ -130,7 +130,7 @@ end
 local MainTab = CreateTab("Main")
 
 CreateButton(MainTab, "TP to Train", function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/ringtaa/train.github.io/refs/heads/main/train.lua'))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/NEWTPTRAIN.github.io/refs/heads/main/TRAIN.LUA"))()
 end, UDim2.new(0.1, 0, 0.2, 0))
 
 CreateButton(MainTab, "TP to Sterling", function()
