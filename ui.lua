@@ -277,7 +277,7 @@ local function startAntiVoid()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local rootPart = player.Character.HumanoidRootPart
             if rootPart.Position.Y < -1 then -- Check if the player is below y = -1
-                loadstring(game:HttpGet('https://raw.githubusercontent.com/ringtaa/train.github.io/refs/heads/main/train.lua'))() -- Teleport to train
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/NEWTPTRAIN.github.io/refs/heads/main/TRAIN.LUA"))() -- Teleport to train
             end
         end
     end)
@@ -334,6 +334,25 @@ end, UDim2.new(0.1, 0, 0.76, 0))
 CreateButton(TownsTab, "Town 6", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringta9321/tptown6.github.io/refs/heads/main/town6.lua"))()
 end, UDim2.new(0.1, 0, 0.9, 0))
+
+
+local BypassTab = CreateTab("Bypass")
+
+CreateButton(BypassTab, "Bypass AC", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/fjruie/bypass.github.io/refs/heads/main/ringta.lua"))()
+end, UDim2.new(0.1, 0, 0.06, 0))
+
+CreateButton(BypassTab, "Sterling Town", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/fjruie/newsterlingtp.github.io/refs/heads/main/RINGTA.lua"))()
+end, UDim2.new(0.1, 0, 0.2, 0))
+
+CreateButton(BypassTab, "Jade Sword", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/fjruie/tpjadesword.github.io/refs/heads/main/ringta.lua"))()
+end, UDim2.new(0.1, 0, 0.34, 0))
+
+
+
+
 
 -- Minimize Button
 local MinimizeButton = Instance.new("TextButton", MainFrame)
