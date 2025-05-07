@@ -350,7 +350,9 @@ CreateButton(BypassTab, "Jade Sword", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/fjruie/tpjadesword.github.io/refs/heads/main/ringta.lua"))()
 end, UDim2.new(0.1, 0, 0.34, 0))
 
-
+CreateButton(BypassTab, "Jade Mask", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/jademask.github.io/refs/heads/main/ringta.lua"))()
+end, UDim2.new(0.1, 0, 0.48, 0))
 
 
 
