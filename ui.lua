@@ -362,6 +362,12 @@ CreateButton(BypassTab, "Tp Trading Post", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/hbjrev/trading.github.io/refs/heads/main/ringta.lua"))()
 end, UDim2.new(0.1, 0, 0.76, 0))
 
+local FeaturesTab = CreateTab("Features")
+
+CreateButton(FeaturesTab, "Collect All", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/collectall.github.io/refs/heads/main/ringta.lua"))()
+end, UDim2.new(0.1, 0, 0.06, 0))
+
 -- Minimize Button
 local MinimizeButton = Instance.new("TextButton", MainFrame)
 MinimizeButton.Text, MinimizeButton.Size, MinimizeButton.Position = "-", UDim2.new(0, 20, 0, 20), UDim2.new(1, -25, 0, 5)
