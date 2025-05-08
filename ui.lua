@@ -354,7 +354,13 @@ CreateButton(BypassTab, "Jade Mask", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/jademask.github.io/refs/heads/main/ringta.lua"))()
 end, UDim2.new(0.1, 0, 0.48, 0))
 
+CreateButton(BypassTab, "Tp To End", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/hbjrev/newtpend.github.io/refs/heads/main/ringta.lua"))()
+end, UDim2.new(0.1, 0, 0.62, 0))
 
+CreateButton(BypassTab, "Tp Trading Post", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/hbjrev/trading.github.io/refs/heads/main/ringta.lua"))()
+end, UDim2.new(0.1, 0, 0.76, 0))
 
 -- Minimize Button
 local MinimizeButton = Instance.new("TextButton", MainFrame)
