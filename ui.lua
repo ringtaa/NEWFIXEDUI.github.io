@@ -474,7 +474,7 @@ CreateButton(FeaturesTab, "Fly", function()
 end, UDim2.new(0.1, 0, 0.06, 0))
 
 CreateButton(FeaturesTab, "Fly Off", function()
-    loadstring(game:HttpGet("https://github.com/ringtaa/unfly.github.io/blob/main/unfly.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/un.github.io/refs/heads/main/ufly.lua"))()
 end, UDim2.new(0.1, 0, 0.53, 0))
 
 -- Minimize Button
