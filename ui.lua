@@ -373,7 +373,7 @@ end, UDim2.new(0.1, 0, 0.06, 0))
 FLYING = false
 local flightConnection -- Stores the loop connection
 
--- Toggle Flight Button
+-- **Toggle Flight Button (Now Updates UI Properly)**
 local ToggleFlightButton = CreateButton(FeaturesTab, "Flight Mode: OFF", function()
     FLYING = not FLYING -- Toggle flight mode
     
@@ -383,12 +383,12 @@ local ToggleFlightButton = CreateButton(FeaturesTab, "Flight Mode: OFF", functio
         enableFlying()
     else
         ToggleFlightButton.Text = "Flight Mode: OFF"
-        ToggleFlightButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Default gray when OFF
+        ToggleFlightButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Gray when OFF
         disableFlying()
     end
 end, UDim2.new(0.1, 0, 0.2, 0))
 
--- Flight Speed Slider UI
+-- Flight Speed Slider UI (Works ONLY if Flight is ON)
 local SpeedSliderFrame = Instance.new("Frame", FeaturesTab)
 SpeedSliderFrame.Size = UDim2.new(0.8, 0, 0.1, 0)
 SpeedSliderFrame.Position = UDim2.new(0.1, 0, 0.34, 0)
@@ -414,7 +414,7 @@ SpeedDisplay.Text = "Speed: 50"
 SpeedDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedDisplay.TextScaled = true
 
--- Slider Functionality (Only Updates Speed When Used and Flight is ON)
+-- Slider Functionality (Works ONLY if Flight is ON)
 SpeedSliderHandle.MouseButton1Down:Connect(function()
     if not FLYING then return end -- Prevents slider use when flight is OFF
 
@@ -434,7 +434,7 @@ SpeedSliderHandle.MouseButton1Down:Connect(function()
     end)
 end)
 
--- Flight Activation Code (Runs Only When Toggle Button is Clicked)
+-- **Flight Activation Code (Runs Only When Toggle Button is Clicked)**
 local function enableFlying()
     local root = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
     local camera = workspace.CurrentCamera
@@ -459,7 +459,7 @@ local function enableFlying()
     end)
 end
 
--- Function to Stop Flight
+-- **Function to Stop Flight**
 local function disableFlying()
     if flightConnection then
         flightConnection:Disconnect() -- Stop updating velocity
