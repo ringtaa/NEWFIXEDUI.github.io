@@ -375,19 +375,20 @@ local flightConnection -- Stores the loop connection
 
 -- Toggle Flight Button
 CreateButton(FeaturesTab, "Toggle Flight", function()
-    -- **Disable flight first before toggling it on**
-    if FLYING then
-        disableFlying()
-    end
+    FLYING = not FLYING -- Toggle flight mode
     
-    -- Toggle flight mode
-    FLYING = not FLYING 
-    
-    -- Enable flight ONLY when toggled on
     if FLYING then
         enableFlying()
+    else
+        disableFlying()
     end
 end, UDim2.new(0.1, 0, 0.2, 0))
+
+-- **Disable Flight Button**
+CreateButton(FeaturesTab, "Disable Flight", function()
+    disableFlying() -- Calls function to stop flying
+    FLYING = false
+end, UDim2.new(0.1, 0, 0.62, 0)) -- **Placed at 0.62**
 
 -- Flight Speed Slider UI
 local SpeedSliderFrame = Instance.new("Frame", FeaturesTab)
