@@ -371,14 +371,20 @@ end, UDim2.new(0.1, 0, 0.06, 0))
 
 -- Flight Disabled by Default
 FLYING = false
-local flightActive = false -- Used to prevent multiple flight loops
+local flightConnection -- Stores the loop connection
 
 -- Toggle Flight Button
 CreateButton(FeaturesTab, "Toggle Flight", function()
-    FLYING = not FLYING -- Toggle flight mode
+    -- **Disable flight first before toggling it on**
+    if FLYING then
+        disableFlying()
+    end
     
-    if FLYING and not flightActive then
-        flightActive = true
+    -- Toggle flight mode
+    FLYING = not FLYING 
+    
+    -- Enable flight ONLY when toggled on
+    if FLYING then
         enableFlying()
     end
 end, UDim2.new(0.1, 0, 0.2, 0))
@@ -443,7 +449,7 @@ local function enableFlying()
     bg.P = 1000
     bg.D = 50
 
-    game:GetService("RunService").RenderStepped:Connect(function()
+    flightConnection = game:GetService("RunService").RenderStepped:Connect(function()
         if FLYING then
             local direction = controlModule:GetMoveVector()
             bv.Velocity = (camera.CFrame.RightVector * direction.X * iyflyspeed) +
@@ -452,9 +458,13 @@ local function enableFlying()
     end)
 end
 
-CreateButton(FeaturesTab, "Fly Off", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/unfly.github.io/refs/heads/main/unfly.lua"))()
-end, UDim2.new(0.1, 0, 0.62, 0))
+-- Function to Stop Flight
+local function disableFlying()
+    if flightConnection then
+        flightConnection:Disconnect() -- Stop updating velocity
+        flightConnection = nil
+    end
+end
 
 
 -- Minimize Button
