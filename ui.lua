@@ -368,9 +368,25 @@ CreateButton(FeaturesTab, "Collect All", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/collectall.github.io/refs/heads/main/ringta.lua"))()
 end, UDim2.new(0.1, 0, 0.06, 0))
 
+-- Features Tab
+local FeaturesTab = CreateTab("Features")
+
+CreateButton(FeaturesTab, "Collect All", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/collectall.github.io/refs/heads/main/ringta.lua"))()
+end, UDim2.new(0.1, 0, 0.06, 0))
+
+-- Flight Disabled by Default
+FLYING = false
+local flightActive = false -- Used to prevent multiple flight loops
+
 -- Toggle Flight Button
 CreateButton(FeaturesTab, "Toggle Flight", function()
     FLYING = not FLYING -- Toggle flight mode
+    
+    if FLYING and not flightActive then
+        flightActive = true
+        enableFlying()
+    end
 end, UDim2.new(0.1, 0, 0.2, 0))
 
 -- Flight Speed Slider UI
@@ -399,10 +415,7 @@ SpeedDisplay.Text = "Speed: 50"
 SpeedDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedDisplay.TextScaled = true
 
--- Flight Disabled by Default
-FLYING = false
-
--- Slider Functionality (Only Activates Flight When Used)
+-- Slider Functionality (Only Updates Speed When Used)
 SpeedSliderHandle.MouseButton1Down:Connect(function()
     local connection
     connection = game:GetService("UserInputService").InputChanged:Connect(function(input)
@@ -412,9 +425,6 @@ SpeedSliderHandle.MouseButton1Down:Connect(function()
             SpeedSliderHandle.Position = UDim2.new(relativePosition, -10, 0, 0)
             SpeedSliderBar.Size = UDim2.new(relativePosition, 0, 0.6, 0)
             SpeedDisplay.Text = "Speed: " .. iyflyspeed
-
-            -- **Enable flying once slider is moved**
-            FLYING = true
         end
     end)
 
@@ -423,7 +433,7 @@ SpeedSliderHandle.MouseButton1Down:Connect(function()
     end)
 end)
 
--- Flight Activation Code
+-- Flight Activation Code (Runs Only When Toggle Button is Clicked)
 local function enableFlying()
     local root = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
     local camera = workspace.CurrentCamera
@@ -448,11 +458,9 @@ local function enableFlying()
     end)
 end
 
-enableFlying()
-
 CreateButton(FeaturesTab, "Fly Off", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/unfly.github.io/refs/heads/main/unfly.lua"))()
-end, UDim2.new(0.1, 0, 0.48, 0))
+end, UDim2.new(0.1, 0, 0.62, 0))
 
 
 -- Minimize Button
