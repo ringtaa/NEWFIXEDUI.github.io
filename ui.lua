@@ -368,12 +368,6 @@ CreateButton(FeaturesTab, "Collect All", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/collectall.github.io/refs/heads/main/ringta.lua"))()
 end, UDim2.new(0.1, 0, 0.06, 0))
 
--- Features Tab
-local FeaturesTab = CreateTab("Features")
-
-CreateButton(FeaturesTab, "Collect All", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/collectall.github.io/refs/heads/main/ringta.lua"))()
-end, UDim2.new(0.1, 0, 0.06, 0))
 
 -- Flight Disabled by Default
 FLYING = false
