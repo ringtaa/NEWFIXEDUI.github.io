@@ -369,7 +369,7 @@ CreateButton(FeaturesTab, "Collect All", function()
 end, UDim2.new(0.1, 0, 0.06, 0))
 
 -- Toggle Flight Button
-CreateButton(FeaturesTab, "Fly Mode Slider", function()
+CreateButton(FeaturesTab, "Toggle Flight", function()
     FLYING = not FLYING -- Toggle flight mode
 end, UDim2.new(0.1, 0, 0.2, 0))
 
@@ -399,7 +399,10 @@ SpeedDisplay.Text = "Speed: 50"
 SpeedDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedDisplay.TextScaled = true
 
--- Slider Functionality
+-- Flight Disabled by Default
+FLYING = false
+
+-- Slider Functionality (Only Activates Flight When Used)
 SpeedSliderHandle.MouseButton1Down:Connect(function()
     local connection
     connection = game:GetService("UserInputService").InputChanged:Connect(function(input)
@@ -409,6 +412,9 @@ SpeedSliderHandle.MouseButton1Down:Connect(function()
             SpeedSliderHandle.Position = UDim2.new(relativePosition, -10, 0, 0)
             SpeedSliderBar.Size = UDim2.new(relativePosition, 0, 0.6, 0)
             SpeedDisplay.Text = "Speed: " .. iyflyspeed
+
+            -- **Enable flying once slider is moved**
+            FLYING = true
         end
     end)
 
@@ -417,7 +423,7 @@ SpeedSliderHandle.MouseButton1Down:Connect(function()
     end)
 end)
 
--- Flight Activation
+-- Flight Activation Code
 local function enableFlying()
     local root = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
     local camera = workspace.CurrentCamera
