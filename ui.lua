@@ -388,7 +388,7 @@ CreateButton(FeaturesTab, "Fly", function()
     local camera = Workspace.CurrentCamera
     local v3inf = Vector3.new(9e9, 9e9, 9e9)
     
-    -- Create BodyVelocity and BodyGyro to enable flying
+    -- Create BodyVelocity and BodyGyro for flying
     local bv = Instance.new("BodyVelocity")
     bv.Name = velocityHandlerName
     bv.Parent = root
@@ -409,14 +409,16 @@ CreateButton(FeaturesTab, "Fly", function()
         if VelocityHandler and GyroHandler then
             GyroHandler.CFrame = camera.CFrame
             local direction = controlModule:GetMoveVector()
-            VelocityHandler.Velocity = (camera.CFrame.RightVector * direction.X * flySpeed) + (-camera.CFrame.LookVector * direction.Z * flySpeed)
+            VelocityHandler.Velocity =
+                (camera.CFrame.RightVector * direction.X * flySpeed) +
+                (-camera.CFrame.LookVector * direction.Z * flySpeed)
         end
     end)
     
     -- Create a slider to adjust fly speed, positioned further down
     local slider = Instance.new("Frame", FeaturesTab)
     slider.Size = UDim2.new(0.8, 0, 0.15, 0)
-    slider.Position = UDim2.new(0.1, 0, 0.24, 0)  -- Moved further down
+    slider.Position = UDim2.new(0.1, 0, 0.24, 0)  -- Positioned below the button
     slider.BackgroundColor3 = Theme.Button
     Instance.new("UICorner", slider).CornerRadius = UDim.new(0, 6)
     
@@ -432,37 +434,45 @@ CreateButton(FeaturesTab, "Fly", function()
     -- Text label to show the current fly speed, positioned below the slider
     local speedText = Instance.new("TextLabel", FeaturesTab)
     speedText.Size = UDim2.new(0.8, 0, 0.15, 0)
-    speedText.Position = UDim2.new(0.1, 0, 0.38, 0)  -- Moved further down below the slider
+    speedText.Position = UDim2.new(0.1, 0, 0.38, 0)
     speedText.Text = "Fly Speed: " .. flySpeed
     speedText.BackgroundTransparency = 1
     speedText.TextColor3 = Theme.Text
     speedText.Font = Enum.Font.GothamBold
     speedText.TextSize = 16
     
-    -- Enable slider dragging for both PC (mouse) and mobile (touch)
-    sliderButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch then
-            local conn
-            conn = UserInputService.InputChanged:Connect(function(inputChanged)
-                if inputChanged.UserInputType == Enum.UserInputType.MouseMovement or 
-                   inputChanged.UserInputType == Enum.UserInputType.Touch then
-                    local pos = inputChanged.Position.X - slider.AbsolutePosition.X
-                    local scale = math.clamp(pos / slider.AbsoluteSize.X, 0, 1)
-                    flySpeed = math.floor(scale * 990) + 10  -- Maps scale [0,1] to flySpeed [10, 1000]
-                    speedText.Text = "Fly Speed: " .. flySpeed
-                    sliderButton.Position = UDim2.new(scale, 0, 0.5, 0)
-                end
-            end)
-            input.Changed:Connect(function(p)
-                if p.UserInputState == Enum.UserInputState.End then
-                    conn:Disconnect()
-                end
-            end)
-        end
+    -- Flag to track whether the slider is being dragged
+    local dragging = false
+
+    -- Connect input events for dragging the slider button (supports both PC & mobile)
+    sliderButton.MouseButton1Down:Connect(function(input)
+        dragging = true
+        local dragConn
+        local endConn
+        
+        dragConn = UserInputService.InputChanged:Connect(function(inputChanged)
+            if dragging and (inputChanged.UserInputType == Enum.UserInputType.MouseMovement 
+                             or inputChanged.UserInputType == Enum.UserInputType.Touch) then
+                local pos = inputChanged.Position.X - slider.AbsolutePosition.X
+                local scale = math.clamp(pos / slider.AbsoluteSize.X, 0, 1)
+                flySpeed = math.floor(scale * 990) + 10  -- Map scale [0,1] to flySpeed [10, 1000]
+                speedText.Text = "Fly Speed: " .. flySpeed
+                sliderButton.Position = UDim2.new(scale, 0, 0.5, 0)
+            end
+        end)
+        
+        endConn = UserInputService.InputEnded:Connect(function(inputEnded)
+            if inputEnded.UserInputType == Enum.UserInputType.MouseButton1 
+            or inputEnded.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+                if dragConn then dragConn:Disconnect() end
+                if endConn then endConn:Disconnect() end
+            end
+        end)
     end)
     
 end, UDim2.new(0.1, 0, 0.06, 0))
+
 
 
 -- Minimize Button
