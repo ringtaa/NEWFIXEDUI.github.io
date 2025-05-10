@@ -423,7 +423,8 @@ CreateButton(FeaturesTab, "Fly", function()
     -- The draggable part of the slider
     local sliderButton = Instance.new("TextButton", slider)
     sliderButton.Size = UDim2.new(0.1, 0, 1, 0)
-    sliderButton.Position = UDim2.new(0, 0, 0, 0)
+    sliderButton.Position = UDim2.new(0, 0, 0.5, 0)  -- Set Y to 0.5 so it centers vertically within the slider
+    sliderButton.AnchorPoint = Vector2.new(0.5, 0.5)
     sliderButton.Text = ""
     sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Instance.new("UICorner", sliderButton).CornerRadius = UDim.new(0, 6)
@@ -447,7 +448,7 @@ CreateButton(FeaturesTab, "Fly", function()
                 local scale = math.clamp(pos / slider.AbsoluteSize.X, 0, 1)
                 flySpeed = math.floor(scale * 990) + 10  -- Maps scale [0,1] to flySpeed [10, 1000]
                 speedText.Text = "Fly Speed: " .. flySpeed
-                sliderButton.Position = UDim2.new(scale, 0, 0, 0)
+                sliderButton.Position = UDim2.new(scale, 0, 0.5, 0)
             end
         end)
         UserInputService.InputEnded:Connect(function(input)
@@ -458,6 +459,7 @@ CreateButton(FeaturesTab, "Fly", function()
     end)
     
 end, UDim2.new(0.1, 0, 0.06, 0))
+
 
 
 -- Minimize Button
