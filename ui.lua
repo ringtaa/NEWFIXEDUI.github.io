@@ -473,7 +473,9 @@ CreateButton(FeaturesTab, "Fly", function()
     
 end, UDim2.new(0.1, 0, 0.06, 0))
 
-
+CreateButton(BypassTab, "Fly Off", function()
+    loadstring(game:HttpGet("https://github.com/ringtaa/unfly.github.io/blob/main/unfly.lua"))()
+end, UDim2.new(0.1, 0, 0.53, 0))
 
 -- Minimize Button
 local MinimizeButton = Instance.new("TextButton", MainFrame)
