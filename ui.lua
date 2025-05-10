@@ -369,7 +369,7 @@ CreateButton(FeaturesTab, "Collect All", function()
 end, UDim2.new(0.1, 0, 0.06, 0))
 
 -- Toggle Flight Button
-CreateButton(FeaturesTab, "Toggle Flight", function()
+CreateButton(FeaturesTab, "Fly Mode Slider", function()
     FLYING = not FLYING -- Toggle flight mode
 end, UDim2.new(0.1, 0, 0.2, 0))
 
