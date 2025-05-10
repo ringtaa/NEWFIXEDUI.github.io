@@ -368,6 +368,96 @@ CreateButton(FeaturesTab, "Collect All", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/collectall.github.io/refs/heads/main/ringta.lua"))()
 end, UDim2.new(0.1, 0, 0.06, 0))
 
+ 
+CreateButton(FeaturesTab, "Fly", function()
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local UserInputService = game:GetService("UserInputService")
+    local Workspace = game:GetService("Workspace")
+    
+    local LocalPlayer = Players.LocalPlayer
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+    
+    local flySpeed = 50  -- Default fly speed
+    local velocityHandlerName = "VelocityHandler"
+    local gyroHandlerName = "GyroHandler"
+    
+    local controlModule = require(LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
+    local root = HumanoidRootPart
+    local camera = Workspace.CurrentCamera
+    local v3inf = Vector3.new(9e9, 9e9, 9e9)
+    
+    -- Create BodyVelocity and BodyGyro to enable flying
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = velocityHandlerName
+    bv.Parent = root
+    bv.MaxForce = v3inf
+    bv.Velocity = Vector3.new()
+    
+    local bg = Instance.new("BodyGyro")
+    bg.Name = gyroHandlerName
+    bg.Parent = root
+    bg.MaxTorque = v3inf
+    bg.P = 1000
+    bg.D = 50
+    
+    -- Update flying mechanics on each frame
+    RunService.RenderStepped:Connect(function()
+        local VelocityHandler = root:FindFirstChild(velocityHandlerName)
+        local GyroHandler = root:FindFirstChild(gyroHandlerName)
+        if VelocityHandler and GyroHandler then
+            GyroHandler.CFrame = camera.CFrame
+            local direction = controlModule:GetMoveVector()
+            VelocityHandler.Velocity = (camera.CFrame.RightVector * direction.X * flySpeed) + (-camera.CFrame.LookVector * direction.Z * flySpeed)
+        end
+    end)
+    
+    -- Create a slider to adjust fly speed
+    local slider = Instance.new("Frame", FeaturesTab)
+    slider.Size = UDim2.new(0.8, 0, 0.15, 0)
+    slider.Position = UDim2.new(0.1, 0, 0.14, 0)  -- Positioned below the button; adjust if needed
+    slider.BackgroundColor3 = Theme.Button
+    Instance.new("UICorner", slider).CornerRadius = UDim.new(0, 6)
+    
+    -- The draggable part of the slider
+    local sliderButton = Instance.new("TextButton", slider)
+    sliderButton.Size = UDim2.new(0.1, 0, 1, 0)
+    sliderButton.Position = UDim2.new(0, 0, 0, 0)
+    sliderButton.Text = ""
+    sliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Instance.new("UICorner", sliderButton).CornerRadius = UDim.new(0, 6)
+    
+    -- Text label to show the current fly speed
+    local speedText = Instance.new("TextLabel", FeaturesTab)
+    speedText.Size = UDim2.new(0.8, 0, 0.15, 0)
+    speedText.Position = UDim2.new(0.1, 0, 0.30, 0)  -- Positioned below the slider; adjust if needed
+    speedText.Text = "Fly Speed: " .. flySpeed
+    speedText.BackgroundTransparency = 1
+    speedText.TextColor3 = Theme.Text
+    speedText.Font = Enum.Font.GothamBold
+    speedText.TextSize = 16
+    
+    -- Allow the slider button to be dragged to update fly speed
+    sliderButton.MouseButton1Down:Connect(function()
+        local conn
+        conn = UserInputService.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                local pos = input.Position.X - slider.AbsolutePosition.X
+                local scale = math.clamp(pos / slider.AbsoluteSize.X, 0, 1)
+                flySpeed = math.floor(scale * 990) + 10  -- Maps scale [0,1] to flySpeed [10, 1000]
+                speedText.Text = "Fly Speed: " .. flySpeed
+                sliderButton.Position = UDim2.new(scale, 0, 0, 0)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                conn:Disconnect()
+            end
+        end)
+    end)
+    
+end, UDim2.new(0.1, 0, 0.06, 0))
 
 
 -- Minimize Button
