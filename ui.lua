@@ -374,21 +374,19 @@ FLYING = false
 local flightConnection -- Stores the loop connection
 
 -- Toggle Flight Button
-CreateButton(FeaturesTab, "Toggle Flight", function()
+local ToggleFlightButton = CreateButton(FeaturesTab, "Flight Mode: OFF", function()
     FLYING = not FLYING -- Toggle flight mode
     
     if FLYING then
+        ToggleFlightButton.Text = "Flight Mode: ON"
+        ToggleFlightButton.BackgroundColor3 = Color3.fromRGB(50, 205, 50) -- Green when ON
         enableFlying()
     else
+        ToggleFlightButton.Text = "Flight Mode: OFF"
+        ToggleFlightButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Default gray when OFF
         disableFlying()
     end
 end, UDim2.new(0.1, 0, 0.2, 0))
-
--- **Disable Flight Button**
-CreateButton(FeaturesTab, "Disable Flight", function()
-    disableFlying() -- Calls function to stop flying
-    FLYING = false
-end, UDim2.new(0.1, 0, 0.62, 0)) -- **Placed at 0.62**
 
 -- Flight Speed Slider UI
 local SpeedSliderFrame = Instance.new("Frame", FeaturesTab)
@@ -416,8 +414,10 @@ SpeedDisplay.Text = "Speed: 50"
 SpeedDisplay.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedDisplay.TextScaled = true
 
--- Slider Functionality (Only Updates Speed When Used)
+-- Slider Functionality (Only Updates Speed When Used and Flight is ON)
 SpeedSliderHandle.MouseButton1Down:Connect(function()
+    if not FLYING then return end -- Prevents slider use when flight is OFF
+
     local connection
     connection = game:GetService("UserInputService").InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
