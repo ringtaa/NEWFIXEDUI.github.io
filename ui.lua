@@ -366,9 +366,13 @@ local FeaturesTab = CreateTab("Features")
 
 CreateButton(FeaturesTab, "Collect All", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/collectall.github.io/refs/heads/main/ringta.lua"))()
-end, UDim2.new(0.1, 0, 0.06, 0))
+end, UDim2.new(0.1, 0, 0.67, 0))
 
- 
+CreateButton(FeaturesTab, "Tp Telsa", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/instantesla.github.io/refs/heads/main/instanttp.lua"))()
+end, UDim2.new(0.1, 0, 0.80, 0))
+
+
 CreateButton(FeaturesTab, "Fly", function()
     local Players = game:GetService("Players")
     local RunService = game:GetService("RunService")
