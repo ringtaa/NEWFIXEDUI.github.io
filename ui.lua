@@ -187,7 +187,7 @@ GunKillAuraButton.MouseButton1Click:Connect(function()
     if gunKillAuraActive then
         GunKillAuraButton.Text = "Gun Aura (Kill Mobs): ON"
         GunKillAuraButton.BackgroundColor3 = Color3.fromRGB(50, 205, 50) -- Green for ON state
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/Aimbot.github.io/refs/heads/main/Kill.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/NEWKILLAURA.github.io/refs/heads/main/NEWkill.lua"))()
     else
         GunKillAuraButton.Text = "Gun Aura (Kill Mobs): OFF"
         GunKillAuraButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Gray for OFF state
