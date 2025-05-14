@@ -339,7 +339,7 @@ end, UDim2.new(0.1, 0, 0.9, 0))
 local BypassTab = CreateTab("Bypass")
 
 CreateButton(BypassTab, "Bypass AC", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/fjruie/bypass.github.io/refs/heads/main/ringta.lua"))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/NEWNENEW.github.io/refs/heads/main/newanti.lua"))()
 end, UDim2.new(0.1, 0, 0.06, 0))
 
 CreateButton(BypassTab, "Sterling Town", function()
