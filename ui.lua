@@ -129,6 +129,10 @@ end
 -- Main Tab for Teleports
 local MainTab = CreateTab("Main")
 
+CreateButton(MainTab, "AUTO HIT OP", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/hbjrev/newhit.github.io/refs/heads/main/hithit.lua"))()
+end, UDim2.new(0.1, 0, 0.06, 0))
+
 CreateButton(MainTab, "TP to Train", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/NEWTPTRAIN.github.io/refs/heads/main/TRAIN.LUA"))()
 end, UDim2.new(0.1, 0, 0.2, 0))
