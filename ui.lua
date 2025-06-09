@@ -22,34 +22,7 @@ end
 
 local Confirmed = false
 
-WindUI:Popup({
-    Title = "Hi!",
-    Icon = "info",
-    Content = "This script made by " .. gradient("SnowTTeam", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")),
-    Buttons = {
-        {
-            Title = "Cancel",
-            --Icon = "",
-            Callback = function() end,
-            Variant = "Tertiary", -- Primary, Secondary, Tertiary
-        },
-        {
-            Title = "Continue",
-            Icon = "arrow-right",
-            Callback = function() Confirmed = true end,
-            Variant = "Primary", -- Primary, Secondary, Tertiary
-        }
-    }
-})
 
-repeat task.wait() until Confirmed
-
-WindUI:Notify({
-    Title = "test",
-    Content = "Скрипт успешно загружен!",
-    Icon = "check-circle",
-    Duration = 3,
-})
 
 local Window = WindUI:CreateWindow({
     Title = "SNT HUB | Dead Rails",
