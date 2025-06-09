@@ -1,692 +1,517 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-function gradient(text, startColor, endColor)
-    local result = ""
-    local length = #text
-
-    for i = 1, length do
-        local t = (i - 1) / math.max(length - 1, 1)
-        local r = math.floor((startColor.R + (endColor.R - startColor.R) * t) * 255)
-        local g = math.floor((startColor.G + (endColor.G - startColor.G) * t) * 255)
-        local b = math.floor((startColor.B + (endColor.B - startColor.B) * t) * 255)
-
-        local char = text:sub(i, i)
-        result = result .. "<font color=\"rgb(" .. r ..", " .. g .. ", " .. b .. ")\">" .. char .. "</font>"
-    end
-
-    return result
+if not game:IsLoaded() then
+    game.Loaded:Wait()
 end
 
-local Confirmed = false
+task.wait(2) -- Allow game to settle
 
-WindUI:Popup({
-    Title = "Hi!",
-    Icon = "info",
-    Content = "This script made by " .. gradient("SnowTTeam", Color3.fromHex("#00FF87"), Color3.fromHex("#60EFFF")),
-    Buttons = {
-        {
-            Title = "Cancel",
-            --Icon = "",
-            Callback = function() end,
-            Variant = "Tertiary", -- Primary, Secondary, Tertiary
-        },
-        {
-            Title = "Continue",
-            Icon = "arrow-right",
-            Callback = function() Confirmed = true end,
-            Variant = "Primary", -- Primary, Secondary, Tertiary
-        }
-    }
-})
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+local Workspace = game:GetService("Workspace")
+local HttpService = game:GetService("HttpService")
 
-repeat task.wait() until Confirmed
+-- Player related variables
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    LocalPlayer = Players.PlayerAdded:Wait()
+end
 
-WindUI:Notify({
-    Title = "test",
-    Content = "Скрипт успешно загружен!",
-    Icon = "check-circle",
-    Duration = 3,
-})
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
 
+-- Load UI Library
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+-- Store Default Values
+local DEFAULT_WALKSPEED = 16
+local DEFAULT_JUMPPOWER = 50
+local DEFAULT_FOV = 70
+local DEFAULT_MAX_ZOOM_DISTANCE = LocalPlayer.CameraMaxZoomDistance
+
+if Humanoid and Humanoid.Parent then
+    DEFAULT_WALKSPEED = Humanoid.WalkSpeed
+    DEFAULT_JUMPPOWER = Humanoid.JumpPower
+end
+if Workspace.CurrentCamera then
+    DEFAULT_FOV = Workspace.CurrentCamera.FieldOfView
+end
+
+-- Variables to store current settings
+local currentWalkSpeed = DEFAULT_WALKSPEED
+local currentJumpPower = DEFAULT_JUMPPOWER
+local currentFov = DEFAULT_FOV
+local AntiAFKEnabled = false
+local InfiniteMaxZoomEnabled = false
+
+-- UI Element References (will be assigned when elements are created)
+local AntiAFKToggleElement = nil
+local WalkSpeedSliderElement = nil
+local JumpPowerSliderElement = nil
+local FovSliderElement = nil
+local InfiniteMaxZoomToggleElement = nil
+local ThemeDropdownElement = nil
+local TransparencyToggleElement = nil
+
+-- Window Creation
 local Window = WindUI:CreateWindow({
-    Title = "SNT HUB | Dead Rails",
-    Icon = "infinity",
-    Author = "SnOwT",
-    Folder = "WindUI",
-    Size = UDim2.fromOffset(360, 330),
-    Transparent = true,
-    Theme = "Dark",
-    SideBarWidth = 200,
-    UserEnabled = true,
-    HasOutline = true,
+    Title = "cookieys hub",
+    Icon = "cookie",
+    Author = "XyraV",
+    Folder = "cookieys",
+    Size = UDim2.fromOffset(40, 40), -- Adjusted size
+    Transparent = true, -- Initial transparency state
+    Theme = "Dark", -- Initial theme
+    SideBarWidth = 180,
+    HasOutline = false,
+    KeySystem = {
+        Key = {
+            "1234",
+            "5678"
+        },
+        Note = "The Key is '1234' or '5678'",
+        URL = "https://github.com/Footagesus/WindUI",
+        SaveKey = true,
+    },
 })
 
 Window:EditOpenButton({
-    Title = "Открыть UI",
+    Title = "Open UI",
     Icon = "monitor",
-    CornerRadius = UDim.new(0, 4),
+    CornerRadius = UDim.new(0, 10),
     StrokeThickness = 2,
     Color = ColorSequence.new(
-        Color3.fromHex("1E213D"),
-        Color3.fromHex("1F75FE")
-    ),
+        Color3.fromHex("FF0F7B"), Color3.fromHex("F89B29")),
     Draggable = true,
 })
 
-local Tabs = {
-    CharacterTab = Window:Tab({ Title = "Character", Icon = "file-cog" }),
-    AutofarmTab = Window:Tab({
-        Title = "Autofarm", Icon = "rub" }),
-    CollectTab = Window:Tab({
-        Title = "Collect", Icon = "sword", }),
-    TrainTab = Window:Tab({
-        Title = "Train", Icon = "train", }),
-    EspTab = Window:Tab({ Title = "ESP", Icon = "eye" }),
-    AimbotTab = Window:Tab({ Title = "Aimbot", Icon = "axe" }),
-    TeleportTab = Window:Tab({ Title = "Teleport", Icon = "user" }),
-    be = Window:Divider(),
-    SettingsTab = Window:Tab({ Title = "Settings", Icon = "code" }),
-    ChangelogsTab = Window:Tab({ Title = "Changelogs", Icon = "info", }),
-    SocialsTab = Window:Tab({ Title = "Socials", Icon = "star"}),
-    b = Window:Divider(),
-    WindowTab = Window:Tab({ Title = "Window and File Configuration", Icon = "settings", Desc = "Manage window settings and file configurations." }),
-    CreateThemeTab = Window:Tab({ Title = "Create Theme", Icon = "palette", Desc = "Design and apply custom themes." }),
-}
-
-
-
---[[ НАСТРОЙКИ ПЕРСОНАЖА ]]--
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
-
-local CharacterSettings = {
-    WalkSpeed = {Value = 16, Default = 16, Locked = false},
-    JumpPower = {Value = 50, Default = 50, Locked = false}
-}
-
-local function updateCharacter()
-    local character = LocalPlayer.Character
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        if not CharacterSettings.WalkSpeed.Locked then
-            humanoid.WalkSpeed = CharacterSettings.WalkSpeed.Value
-        end
-        if not CharacterSettings.JumpPower.Locked then
-            humanoid.JumpPower = CharacterSettings.JumpPower.Value
-        end
+-- Anti AFK Logic
+local AntiAFKConnection
+local function StartAntiAFK()
+    if AntiAFKConnection then
+        AntiAFKConnection:Disconnect()
     end
-end
-
-Tabs.CharacterTab:Slider({
-    Title = "Walkspeed",
-    Value = {Min = 0, Max = 200, Default = 16},
-    Callback = function(value)
-        CharacterSettings.WalkSpeed.Value = value
-        updateCharacter()
-    end
-})
-
-Tabs.CharacterTab:Button({
-    Title = "Reset walkspeed",
-    Callback = function()
-        CharacterSettings.WalkSpeed.Value = CharacterSettings.WalkSpeed.Default
-        updateCharacter()
-    end
-})
-
-Tabs.CharacterTab:Toggle({
-    Title = "Block walkspeed",
-    Default = false,
-    Callback = function(state)
-        CharacterSettings.WalkSpeed.Locked = state
-        updateCharacter()
-    end
-})
-
-Tabs.CharacterTab:Slider({
-    Title = "Jumppower",
-    Value = {Min = 0, Max = 200, Default = 50},
-    Callback = function(value)
-        CharacterSettings.JumpPower.Value = value
-        updateCharacter()
-    end
-})
-
-
-Tabs.CharacterTab:Button({
-    Title = "Reset jumppower",
-    Callback = function()
-        CharacterSettings.JumpPower.Value = CharacterSettings.JumpPower.Default
-        updateCharacter()
-    end
-})
-
-Tabs.CharacterTab:Toggle({
-    Title = "Block jumppower",
-    Default = false,
-    Callback = function(state)
-        CharacterSettings.JumpPower.Locked = state
-        updateCharacter()
-    end
-})
-
-Tabs.CharacterTab:Toggle({
-    Title = "Infinite stamina",
-    Default = false,
-    Callback = function(Value)
-        InfiniteStamina = Value
-end,
-})
-
--- Items
-local function GetItemNames()
-    local items = {}
-    local runtimeItems = workspace:FindFirstChild("RuntimeItems")
-    if runtimeItems then
-        for _, item in ipairs(runtimeItems:GetDescendants()) do
-            if item:IsA("Model") then
-                table.insert(items, item.Name)
-            end
+    AntiAFKConnection = RunService.Stepped:Connect(function()
+        if AntiAFKEnabled and LocalPlayer and LocalPlayer.Character then
+            pcall(VirtualUser.Button2Down, VirtualUser, Enum.UserInputType.MouseButton2)
+            task.wait(0.1)
+            pcall(VirtualUser.Button2Up, VirtualUser, Enum.UserInputType.MouseButton2)
         end
-    else
-        warn("RuntimeItems folder not found!")
-    end
-    return items
-end
-
-local Dropdown = Tabs.CollectTab:Dropdown({
-    Title = "Item",
-    Values = GetItemNames(),
-    Value = "Select item name",
-    Multi = false,
-    Callback = function(selectedItem)
-       if type(selectedItem) == "table" then
-           selectedItem = selectedItem[1] 
-       end
-   end,
-})
-
-Tabs.CollectTab:Button({
-    Title = "Refresh item list",
-    Callback = function()
-      Dropdown:Refresh(GetItemNames())
-    end,
-})
-
-Tabs.CollectTab:Button({
-    Title = "Collect selected",
-    Callback = function()local selectedItemName = Dropdown.CurrentOption
-       if type(selectedItemName) == "table" then
-           selectedItemName = selectedItemName[1] 
-       end
-
-       if selectedItemName == "Select an item" then
-           warn("No item selected!")
-           return
-       end
-
-       local runtimeItems = workspace:FindFirstChild("RuntimeItems")
-       if not runtimeItems then
-           warn("RuntimeItems folder not found!")
-           return
-       end
-
-       local selectedItem
-       for _, item in ipairs(runtimeItems:GetDescendants()) do
-           if item:IsA("Model") and item.Name == selectedItemName then
-               selectedItem = item
-               break
-           end
-       end
-
-       if not selectedItem then
-           warn("Item not found in RuntimeItems:", selectedItemName)
-           return
-       end
-
-       local Players = game:GetService("Players")
-       local LocalPlayer = Players.LocalPlayer
-       if not LocalPlayer then
-           warn("LocalPlayer not found!")
-           return
-       end
-
-       local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-       local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-
-       if not selectedItem.PrimaryPart then
-           warn(selectedItem.Name .. " has no PrimaryPart and cannot be moved.")
-           return
-       end
-
-       selectedItem:SetPrimaryPartCFrame(HumanoidRootPart.CFrame + Vector3.new(0, 1, 0))
-       print("Collected:", selectedItem.Name)
-   end,
-})
-
-Tabs.CollectTab:Button({
-    Title = "Collect all items",
-    Callback = function()
-        local runtimeItems = workspace:FindFirstChild("RuntimeItems")
-       if not runtimeItems then
-           warn("RuntimeItems folder not found!")
-           return
-       end
-
-       local ps = game:GetService("Players").LocalPlayer
-       local ch = ps.Character or ps.CharacterAdded:Wait()
-       local HumanoidRootPart = ch:WaitForChild("HumanoidRootPart")
-
-       for _, item in ipairs(runtimeItems:GetDescendants()) do
-           if item:IsA("Model") then
-               if item.PrimaryPart then
-                   local offset = HumanoidRootPart.CFrame.LookVector * 5
-                   item:SetPrimaryPartCFrame(HumanoidRootPart.CFrame + offset)
-               else
-                   warn(item.Name .. " has no PrimaryPart .")
-               end
-           end
-       end 
-   end,
-})
-
--- [[ ESP MOBS & ITEMS ]] --
-
-local ESPHandles = {}
-local ESPEnabled = false
-
-local function CreateESP(object, color)
-    if not object or not object.PrimaryPart then return end
-
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ESP_Highlight"
-    highlight.Adornee = object
-    highlight.FillColor = color
-    highlight.OutlineColor = color
-    highlight.Parent = object
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "ESP_Billboard"
-    billboard.Adornee = object.PrimaryPart
-    billboard.Size = UDim2.new(0, 200, 0, 50)
-    billboard.StudsOffset = Vector3.new(0, 5, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = object
-
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Text = object.Name
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.TextColor3 = color
-    textLabel.BackgroundTransparency = 1
-    textLabel.TextSize = 7
-    textLabel.Parent = billboard
-
-    ESPHandles[object] = {Highlight = highlight, Billboard = billboard}
-end
-
-local function ClearESP()
-    for obj, handles in pairs(ESPHandles) do
-        if handles.Highlight then handles.Highlight:Destroy() end
-        if handles.Billboard then handles.Billboard:Destroy() end
-    end
-    ESPHandles = {}
-end
-
-local function UpdateESP()
-    ClearESP()
-
-    -- ESP for Items 
-    local runtimeItems = workspace:FindFirstChild("RuntimeItems")
-    if runtimeItems then
-        for _, item in ipairs(runtimeItems:GetDescendants()) do
-            if item:IsA("Model") then
-                CreateESP(item, Color3.new(1, 0, 0)) 
-            end
-        end
-    end
-
-    -- ESP mobs
-    local baseplates = workspace:FindFirstChild("Baseplates")
-    if baseplates and #baseplates:GetChildren() >= 2 then
-        local secondBaseplate = baseplates:GetChildren()[2]
-        local centerBaseplate = secondBaseplate and secondBaseplate:FindFirstChild("CenterBaseplate")
-        local animals = centerBaseplate and centerBaseplate:FindFirstChild("Animals")
-        if animals then
-            for _, animal in ipairs(animals:GetDescendants()) do
-                if animal:IsA("Model") then
-                    CreateESP(animal, Color3.new(1, 0, 1)) -- Purple for Animals
-                end
-            end
-        end
-    end
-    
-    local nightEnemies = workspace:FindFirstChild("NightEnemies")
-    if nightEnemies then
-        for _, enemy in ipairs(nightEnemies:GetDescendants()) do
-            if enemy:IsA("Model") then
-                CreateESP(enemy, Color3.new(0, 0, 1)) -- Blue for Night Enemies
-            end
-        end
-    end
-
-    local destroyedHouse = workspace:FindFirstChild("RandomBuildings") and workspace.RandomBuildings:FindFirstChild("DestroyedHouse")
-    local zombiePart = destroyedHouse and destroyedHouse:FindFirstChild("StandaloneZombiePart")
-    local zombies = zombiePart and zombiePart:FindFirstChild("Zombies")
-    if zombies then
-        for _, zombie in ipairs(zombies:GetChildren()) do
-            if zombie:IsA("Model") then
-                CreateESP(zombie, Color3.new(0, 1, 0)) -- Green for Zombies
-            end
-        end
-    end
-end
-
-local function AutoUpdateESP()
-    while ESPEnabled do
-        UpdateESP()
-        wait() 
-    end
-end
-
-Tabs.EspTab:Toggle({
-    Title = "Enable Mobs&Items ESP",
-    Default = ESPSettings.Mobs.Enabled,
-   Callback = function(Value)
-        ESPEnabled = Value
-        if Value then
-            UpdateESP()
-            coroutine.wrap(AutoUpdateESP)()
-        else
-            ClearESP()
-        end
-    end
-})
-
--- Aimbot --
-
-Tabs.AimbotTab:Section({
-    Title = "Aimlock",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-local Aimlock = {
-    Enabled = false,
-    Target = nil,
-    Hitpart = "Head",
-    Prediction = 0.14,
-    Smoothing = 0.1,
-    FOV = 60
-}
-
-local SilentAim = {
-    Enabled = false,
-    HitChance = 100,
-    Hitpart = "Head"
-}
-
-local ShowFOVCircle = false
-local FOVCircle = nil
-
-Tabs.AimbotTab:Toggle({
-    Title = "Aimlock",
-    Default = false,
-    Callback = function(Value)
-        Aimlock.Enabled = Value
-        if Value then
-            RunAimlock()
-        end
-end,
-})
-
-Tabs.AimbotTab:Dropdown({
-    Title = "Part to hit",
-    Values = {"Head", "UpperTorso", "HumanoidRootPart", "LowerTorso"},
-    Value = "Head",
-    Callback = function(Option)
-    Aimlock.Hitpart = Option
-end,
-})
-
-Tabs.AimbotTab:Slider({
-    Title = "Prediction",
-    Step = 0.01,
-    Value = {Min = 0, 
-             Max = 0.5, 
-             Default = 0.14},
-    Callback = function(Value)
-        Aimlock.Prediction = Value
-end,
-})
-
-Tabs.AimbotTab:Slider({
-    Title = "Smoothing",
-    Step = 0.01,
-    Value = {Min = 0, 
-             Max = 1, 
-             Default = 0.1},
-    Callback = function(Value)
-        Aimlock.Smoothing = Value
-end,
-})
-
-Tabs.AimbotTab:Slider({
-    Title = "FOV Range",
-    Value = {Min = 0, Max = 360, Default = 60},
-    Callback = function(Value)
-        Aimlock.FOV = Value
-        if FOVCircle then
-            FOVCircle.Radius = Aimlock.FOV
-        end
-end,
-})
-
-Tabs.AimbotTab:Section({
-    Title = "Silent AIM",
-    TextXAlignment = "Left",
-    TextSize = 17,
-})
-
-Tabs.AimbotTab:Toggle({
-    Title = "Silent Aim",
-    Default = false,
-    Callback = function(Value)
-        SilentAim.Enabled = Value
-end,
-})
-
-Tabs.AimbotTab:Dropdown({
-    Title = "Part to aim",
-    Values = {"Head", "UpperTorso", "HumanoidRootPart", "LowerTorso"},
-    Value = "Head",
-    Callback = function(Option)
-    SilentAim.Hitpart = Option
-end,
-})
-
-Tabs.AimbotTab:Slider({
-    Title = "Hit chance",
-    Step = 1,
-    Value = {Min = 0,
-             Max = 100,
-             Default = 100},
-    Callback = function(Value)
-        SilentAim.HitChance = Value
-    end,
-})
-
-Tabs.AimbotTab:Toggle({
-    Title = "Fov Circle",
-    Default = false,
-    Callback = function(state)
-        ShowFOVCircle = state
-        if state then
-            CreateFOVCircle()
-        else
-            if FOVCircle then
-                FOVCircle:Destroy()
-                FOVCircle = nil
-            end
-        end
-    end,
-})
-
--- Train --
-
-Tabs.TrainTab:Slider({
-    Title = "Train speed",
-    Step = 0.1,
-    Value = {
-        Min = 1,
-        Max = 10,
-        Default = 1,
-    },
-    Callback = function(Value)
-         for _, train in pairs(workspace:FindFirstChild("Trains"):GetChildren()) do
-            if train:FindFirstChild("Configuration") and train.Configuration:FindFirstChild("Speed") then
-                train.Configuration.Speed.Value = Value * 10
-            end
-        end
-    end,
-})
-
-Tabs.TrainTab:Button({
-    Title = "Instant Brake",
-    Callback = function()
-        for _, train in pairs(workspace:FindFirstChild("Trains"):GetChildren()) do
-            if train:FindFirstChild("Configuration") and train.Configuration:FindFirstChild("Speed") then
-                train.Configuration.Speed.Value = 0
-            end
-        end
-    end,
-})
-
--- Teleport --
-
-local Locations = {
-    "Spawn Point",
-    "Train Station",
-    "Power Plant",
-    "Mine Entrance",
-    "Tunnel Center"
-}
-
-Tabs.TeleportTab:Dropdown({
-    Title = "Select Location",
-    Values = Locations,
-    Value = "Spawn Point",
-    Multi = false,
-    AllowNone = true,
-    Callback = function(option)
-        local char = game.Players.LocalPlayer.Character
-        if char then
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                if option == "Spawn Point" then
-                    hrp.CFrame = game:GetService("Workspace").SpawnLocation.CFrame
-                elseif option == "Train Station" then
-                    hrp.CFrame = CFrame.new(100, 50, -200)
-                end
-            end
-        end
-    end,
-})
-
-function RunAimlock()
-    coroutine.wrap(function()
-        while Aimlock.Enabled do
-            wait()
-            
-            local closestPlayer, closestDistance = FindClosestPlayer()
-            
-            if closestPlayer and closestDistance <= Aimlock.FOV then
-                Aimlock.Target = closestPlayer
-                local targetPart = closestPlayer.Character:FindFirstChild(Aimlock.Hitpart)
-                if targetPart then
-                    local predictedPosition = targetPart.Position + (targetPart.Velocity * Aimlock.Prediction)
-                    local camera = workspace.CurrentCamera
-                    local smoothedPosition = camera.CFrame.Position:Lerp(predictedPosition, Aimlock.Smoothing)
-                    
-                    camera.CFrame = CFrame.new(camera.CFrame.Position, smoothedPosition)
-                end
-            else
-                Aimlock.Target = nil
-            end
-        end
-    end)()
-end
-
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local args = {...}
-    local method = getnamecallmethod()
-    
-    if SilentAim.Enabled and method == "FindPartOnRayWithIgnoreList" and math.random(1, 100) <= SilentAim.HitChance then
-        local closestPlayer = FindClosestPlayer()
-        if closestPlayer then
-            local targetPart = closestPlayer.Character:FindFirstChild(SilentAim.Hitpart)
-            if targetPart then
-                args[1] = Ray.new(args[1].Origin, (targetPart.Position - args[1].Origin).Unit * 1000)
-                return oldNamecall(self, unpack(args))
-            end
-        end
-    end
-    
-    return oldNamecall(self, ...)
-end)
-
-function FindClosestPlayer()
-    local closestPlayer = nil
-    local closestDistance = math.huge
-    local localPlayer = game.Players.LocalPlayer
-    local localCharacter = localPlayer.Character
-    local localPosition = localCharacter and localCharacter:FindFirstChild("Head") and localCharacter.Head.Position
-    
-    if localPosition then
-        for _, player in pairs(game.Players:GetPlayers()) do
-            if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Head") then
-                local distance = (player.Character.Head.Position - localPosition).Magnitude
-                if distance < closestDistance then
-                    closestDistance = distance
-                    closestPlayer = player
-                end
-            end
-        end
-    end
-    
-    return closestPlayer, closestDistance
-end
-
-function CreateFOVCircle()
-    FOVCircle = Drawing.new("Circle")
-    FOVCircle.Visible = true
-    FOVCircle.Transparency = 1
-    FOVCircle.Color = Color3.fromRGB(255, 255, 255)
-    FOVCircle.Thickness = 1
-    FOVCircle.Filled = false
-    FOVCircle.Radius = Aimlock.FOV
-    FOVCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)
-    
-    game:GetService("RunService").RenderStepped:Connect(function()
-        FOVCircle.Radius = Aimlock.FOV
-        FOVCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)
     end)
 end
 
-game:GetService('RunService').Stepped:Connect(function()
-    if Noclip and game.Players.LocalPlayer.Character then
-        for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
+local function StopAntiAFK()
+    if AntiAFKConnection then
+        AntiAFKConnection:Disconnect()
+        AntiAFKConnection = nil
+    end
+end
+
+-- Function to safely set humanoid properties
+local function SetHumanoidProperty(propName, value)
+    local player = Players.LocalPlayer
+    if player and player.Character then
+        local char = player.Character
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            pcall(function()
+                hum[propName] = value
+            end)
         end
     end
-    
-    if InfiniteStamina and game.Players.LocalPlayer.Character:FindFirstChild("Stamina") then
-        game.Players.LocalPlayer.Character.Stamina.Value = 100
+end
+
+-- Function to safely set player properties
+local function SetPlayerProperty(propName, value)
+    local player = Players.LocalPlayer
+    if player then
+        pcall(function()
+            player[propName] = value
+        end)
+    end
+end
+
+-- Tabs Definition
+local Tabs = {
+    HomeTab = Window:Tab({
+        Title = "Home",
+        Icon = "house",
+        Desc = "Welcome! Find general information here."
+    }),
+    MainTab = Window:Tab({
+        Title = "Main",
+        Icon = "star",
+        Desc = "Core features and utilities."
+    }),
+    PhantomTab = Window:Tab({
+        Title = "Phantom",
+        Icon = "ghost",
+        Desc = "Player modifications and utilities."
+    }),
+    SettingsTab = Window:Tab({
+        Title = "Settings",
+        Icon = "settings",
+        Desc = "Customize UI appearance and manage configurations."
+    })
+}
+Window:SelectTab(1) -- Select Home tab by default
+
+-- Home Tab Content
+Tabs.HomeTab:Button({
+    Title = "Discord Invite",
+    Desc = "Click to copy the Discord server invite link.",
+    Callback = function()
+        local discordLink = "https://discord.gg/ee4veXxYFZ"
+        if setclipboard then
+            local success, err = pcall(setclipboard, discordLink)
+            if success then
+                WindUI:Notify({
+                    Title = "Link Copied!",
+                    Content = "Discord invite link copied to clipboard.",
+                    Icon = "clipboard-check",
+                    Duration = 3
+                })
+            else
+                WindUI:Notify({
+                    Title = "Error",
+                    Content = "Failed to copy link: " .. tostring(err),
+                    Icon = "alert-triangle",
+                    Duration = 5
+                })
+            end
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = "Could not copy link (setclipboard unavailable).",
+                Icon = "alert-triangle",
+                Duration = 5
+            })
+            warn("setclipboard function not available in this environment.")
+        end
+    end
+})
+
+-- Main Tab Content
+local function LoadScriptFromURL(url, scriptName)
+    WindUI:Notify({
+        Title = "Loading...",
+        Content = "Loading " .. scriptName .. ". Please wait.",
+        Icon = "loader-circle",
+        Duration = 3
+    })
+    task.spawn(function()
+        local success, err = pcall(function()
+            loadstring(game:HttpGet(url))()
+        end)
+        if not success then
+            WindUI:Notify({
+                Title = "Error",
+                Content = "Failed to load " .. scriptName .. ": " .. tostring(err),
+                Icon = "alert-triangle",
+                Duration = 5
+            })
+            warn(scriptName .. " load error:", err)
+        else
+            WindUI:Notify({
+                Title = "Success",
+                Content = scriptName .. " loaded successfully.",
+                Icon = "check",
+                Duration = 3
+            })
+        end
+    end)
+end
+
+Tabs.MainTab:Button({
+    Title = "Load Infinite Yield",
+    Desc = "Loads the Infinite Yield admin script.",
+    Callback = function()
+        LoadScriptFromURL("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", "Infinite Yield")
+    end
+})
+
+Tabs.MainTab:Button({
+    Title = "Load Nameless Admin",
+    Desc = "Loads the Nameless Admin script.",
+    Callback = function()
+        LoadScriptFromURL("https://raw.githubusercontent.com/ltseverydayyou/Nameless-Admin/main/Source.lua", "Nameless Admin")
+    end
+})
+
+-- Phantom Tab Content
+AntiAFKToggleElement = Tabs.PhantomTab:Toggle({
+    Title = "Anti AFK",
+    Desc = "Prevents game kick for inactivity.",
+    Value = AntiAFKEnabled,
+    Callback = function(state)
+        AntiAFKEnabled = state
+        if AntiAFKEnabled then
+            StartAntiAFK()
+        else
+            StopAntiAFK()
+        end
+    end
+})
+
+WalkSpeedSliderElement = Tabs.PhantomTab:Slider({
+    Title = "Walk Speed",
+    Desc = "Adjust character movement speed.",
+    Value = {
+        Min = 0,
+        Max = 200,
+        Default = DEFAULT_WALKSPEED
+    },
+    Callback = function(value)
+        SetHumanoidProperty("WalkSpeed", value)
+        currentWalkSpeed = value
+    end
+})
+
+JumpPowerSliderElement = Tabs.PhantomTab:Slider({
+    Title = "Jump Power",
+    Desc = "Adjust character jump height.",
+    Value = {
+        Min = 0,
+        Max = 200,
+        Default = DEFAULT_JUMPPOWER
+    },
+    Callback = function(value)
+        SetHumanoidProperty("JumpPower", value)
+        currentJumpPower = value
+    end
+})
+
+FovSliderElement = Tabs.PhantomTab:Slider({
+    Title = "FOV Changer",
+    Desc = "Adjust camera Field of View.",
+    Value = {
+        Min = 1,
+        Max = 120,
+        Default = DEFAULT_FOV
+    },
+    Callback = function(value)
+        if Workspace.CurrentCamera then
+            Workspace.CurrentCamera.FieldOfView = value
+        end
+        currentFov = value
+    end
+})
+
+InfiniteMaxZoomToggleElement = Tabs.PhantomTab:Toggle({
+    Title = "Infinite Max Zoom",
+    Desc = "Allows zooming out indefinitely.",
+    Value = InfiniteMaxZoomEnabled,
+    Callback = function(state)
+        InfiniteMaxZoomEnabled = state
+        if InfiniteMaxZoomEnabled then
+            SetPlayerProperty("CameraMaxZoomDistance", math.huge)
+        else
+            SetPlayerProperty("CameraMaxZoomDistance", DEFAULT_MAX_ZOOM_DISTANCE)
+        end
+    end
+})
+
+-- Settings Tab Content
+Tabs.SettingsTab:Section({
+    Title = "UI Appearance"
+})
+
+local themeValues = {}
+for name, _ in pairs(WindUI:GetThemes()) do
+    table.insert(themeValues, name)
+end
+
+ThemeDropdownElement = Tabs.SettingsTab:Dropdown({
+    Title = "Select Theme",
+    Desc = "Change the UI's visual theme.",
+    Multi = false,
+    AllowNone = false,
+    Value = WindUI:GetCurrentTheme(), -- Set initial value
+    Values = themeValues,
+    Callback = function(theme)
+        WindUI:SetTheme(theme)
+    end
+})
+
+TransparencyToggleElement = Tabs.SettingsTab:Toggle({
+    Title = "Window Transparency",
+    Desc = "Toggle the window's background transparency.",
+    Value = Window.Transparent, -- Use the window's current transparency state
+    Callback = function(state)
+        Window:ToggleTransparency(state) -- This function should exist in WindUI's Window object
+    end
+})
+
+Tabs.SettingsTab:Section({
+    Title = "Configuration (Example - Not Fully Implemented)"
+})
+Tabs.SettingsTab:Paragraph({
+    Title = "Save/Load Configurations",
+    Desc = "Below are placeholders for a configuration system. Full implementation requires file system access (makefolder, writefile, readfile, listfiles) typically provided by the exploit environment."
+})
+
+local configFileNameInput = "MySettings"
+Tabs.SettingsTab:Input({
+    Title = "Config File Name",
+    Value = configFileNameInput,
+    Placeholder = "Enter config name",
+    Callback = function(input)
+        configFileNameInput = input
+    end
+})
+Tabs.SettingsTab:Button({
+    Title = "Save Current Config (Placeholder)",
+    Desc = "Saves current Phantom & UI settings.",
+    Callback = function()
+        if not configFileNameInput or configFileNameInput == "" then
+            WindUI:Notify({
+                Title = "Error",
+                Content = "Please enter a config file name.",
+                Icon = "alert-triangle",
+                Duration = 3
+            })
+            return
+        end
+        -- Example of what to save. This part needs robust implementation.
+        local settingsToSave = {
+            walkSpeed = currentWalkSpeed,
+            jumpPower = currentJumpPower,
+            fov = currentFov,
+            antiAFK = AntiAFKEnabled,
+            infiniteZoom = InfiniteMaxZoomEnabled,
+            theme = WindUI:GetCurrentTheme(),
+            transparent = Window.Transparent -- Or WindUI:GetTransparency() if that's more accurate
+        }
+        -- In a real scenario: SaveFile(configFileNameInput, settingsToSave)
+        WindUI:Notify({
+            Title = "Save (Placeholder)",
+            Content = "Config '" .. configFileNameInput .. "' save function called. Data: " .. HttpService:JSONEncode(settingsToSave),
+            Icon = "save",
+            Duration = 5
+        })
+    end
+})
+Tabs.SettingsTab:Button({
+    Title = "Load Config (Placeholder)",
+    Desc = "Loads settings from the specified file.",
+    Callback = function()
+        if not configFileNameInput or configFileNameInput == "" then
+            WindUI:Notify({
+                Title = "Error",
+                Content = "Please enter a config file name to load.",
+                Icon = "alert-triangle",
+                Duration = 3
+            })
+            return
+        end
+        -- In a real scenario: local loadedData = LoadFile(configFileNameInput)
+        -- Then apply loadedData to UI elements and internal variables.
+        WindUI:Notify({
+            Title = "Load (Placeholder)",
+            Content = "Config '" .. configFileNameInput .. "' load function called.",
+            Icon = "upload-cloud",
+            Duration = 3
+        })
+    end
+})
+
+
+-- Function to reset settings to default and update UI
+local function ResetSettingsAndUI()
+    -- Phantom Features
+    AntiAFKEnabled = false
+    if AntiAFKToggleElement and AntiAFKToggleElement.SetValue then
+        AntiAFKToggleElement:SetValue(false)
+    end
+    StopAntiAFK()
+
+    currentWalkSpeed = DEFAULT_WALKSPEED
+    SetHumanoidProperty("WalkSpeed", DEFAULT_WALKSPEED)
+    if WalkSpeedSliderElement and WalkSpeedSliderElement.SetValue then
+        WalkSpeedSliderElement:SetValue(DEFAULT_WALKSPEED)
+    end
+
+    currentJumpPower = DEFAULT_JUMPPOWER
+    SetHumanoidProperty("JumpPower", DEFAULT_JUMPPOWER)
+    if JumpPowerSliderElement and JumpPowerSliderElement.SetValue then
+        JumpPowerSliderElement:SetValue(DEFAULT_JUMPPOWER)
+    end
+
+    currentFov = DEFAULT_FOV
+    if Workspace.CurrentCamera then
+        Workspace.CurrentCamera.FieldOfView = DEFAULT_FOV
+    end
+    if FovSliderElement and FovSliderElement.SetValue then
+        FovSliderElement:SetValue(DEFAULT_FOV)
+    end
+
+    InfiniteMaxZoomEnabled = false
+    SetPlayerProperty("CameraMaxZoomDistance", DEFAULT_MAX_ZOOM_DISTANCE)
+    if InfiniteMaxZoomToggleElement and InfiniteMaxZoomToggleElement.SetValue then
+        InfiniteMaxZoomToggleElement:SetValue(false)
+    end
+
+    -- UI Settings (Theme and Transparency) - Resetting them might depend on desired behavior
+    -- For now, let's assume they don't reset with this specific function call,
+    -- or if they should, define their defaults and apply them.
+    -- Example:
+    -- WindUI:SetTheme("Dark") -- Default theme
+    -- if ThemeDropdownElement and ThemeDropdownElement.Select then ThemeDropdownElement:Select("Dark") end
+    -- Window:ToggleTransparency(true) -- Default transparency
+    -- if TransparencyToggleElement and TransparencyToggleElement.SetValue then TransparencyToggleElement:SetValue(true) end
+end
+
+game:BindToClose(ResetSettingsAndUI)
+
+local playerRemovingConnection
+playerRemovingConnection = LocalPlayer.Destroying:Connect(function()
+    ResetSettingsAndUI()
+    if playerRemovingConnection then
+        playerRemovingConnection:Disconnect()
+    end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    Character = newCharacter
+    Humanoid = newCharacter:WaitForChild("Humanoid")
+    task.wait(0.1)
+
+    -- Re-apply Phantom settings
+    SetHumanoidProperty("WalkSpeed", currentWalkSpeed)
+    SetHumanoidProperty("JumpPower", currentJumpPower)
+    if Workspace.CurrentCamera then
+        Workspace.CurrentCamera.FieldOfView = currentFov
+    end
+    if AntiAFKEnabled then
+        StartAntiAFK()
+    end
+    if InfiniteMaxZoomEnabled then
+        SetPlayerProperty("CameraMaxZoomDistance", math.huge)
+    else
+        SetPlayerProperty("CameraMaxZoomDistance", DEFAULT_MAX_ZOOM_DISTANCE)
+    end
+end)
+
+task.defer(function()
+    -- Initialize Phantom tab UI elements
+    if Workspace.CurrentCamera and FovSliderElement and FovSliderElement.SetValue then
+        FovSliderElement:SetValue(Workspace.CurrentCamera.FieldOfView)
+    end
+    if InfiniteMaxZoomToggleElement and InfiniteMaxZoomToggleElement.SetValue then
+        InfiniteMaxZoomToggleElement:SetValue(InfiniteMaxZoomEnabled)
+    end
+    if InfiniteMaxZoomEnabled then
+        SetPlayerProperty("CameraMaxZoomDistance", math.huge)
+    else
+        SetPlayerProperty("CameraMaxZoomDistance", DEFAULT_MAX_ZOOM_DISTANCE)
+    end
+
+    -- Initialize Settings tab UI elements
+    if ThemeDropdownElement then
+        ThemeDropdownElement:Select(WindUI:GetCurrentTheme())
+    end
+    if TransparencyToggleElement and TransparencyToggleElement.SetValue then
+        -- Assuming Window.Transparent reflects the actual state after CreateWindow
+        TransparencyToggleElement:SetValue(Window.Transparent)
     end
 end)
